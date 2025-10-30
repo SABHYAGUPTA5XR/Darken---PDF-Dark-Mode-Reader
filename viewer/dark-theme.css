@@ -1,33 +1,101 @@
-/* This is the key: PDF.js renders text in its own layer */
-.textLayer > span {
-  color: #d4d4d4 !important; /* Force text to be light */
-  background-color: transparent !important;
+/* --- 1. Theme Variable Definitions --- */
+/* This is the default (Pure Dark) */
+:root {
+  --bg-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --page-bg-color: #1e1e1e; /* Canvas background */
+  --toolbar-bg: #252526;
+  --button-bg: #3e3e42;
+  --button-text: #ffffff;
 }
 
-/* This targets the main page background, drawn on the canvas */
-.canvasWrapper {
-  /* Default: no filter, background is set in JS */
+[data-theme="soft-dark"] {
+  --bg-color: #252526;
+  --text-color: #cccccc;
+  --page-bg-color: #252526;
 }
 
-/* Make sure the page div itself is dark */
+[data-theme="sepia"] {
+  --bg-color: #f4e8c1;      /* Light tan body background */
+  --text-color: #5b4636;  /* Dark brown text */
+  --page-bg-color: #f4e8c1;  /* Page background */
+  --toolbar-bg: #e4d8b1;
+  --button-bg: #5b4636;
+  --button-text: #ffffff;
+}
+
+/* --- 2. General Page Styles --- */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  font-family: sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+#pdf-container {
+  text-align: center;
+  padding-top: 60px; /* Leave space for the sticky toolbar */
+}
+
+/* --- 3. Toolbar Styles --- */
+#toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--toolbar-bg);
+  border-bottom: 1px solid #000;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  gap: 20px;
+}
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#toolbar label {
+  font-size: 14px;
+}
+#toolbar button,
+#toolbar select {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: sans-serif;
+  cursor: pointer;
+}
+
+/* --- 4. PDF.js Viewer Styles --- */
 .page {
-  background: #1e1e1e !important;
-  margin-bottom: 20px; /* Add some space between pages */
+  /* Use the page-bg-color variable for the div */
+  background: var(--page-bg-color) !important;
+  margin-bottom: 20px;
   position: relative; /* Needed for text layer to overlay properly */
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* The text layer sits on top of the canvas */
 .textLayer {
   position: absolute;
   top: 0;
   left: 0;
 }
 
-/*
- This is the "Smart Invert" logic for the V1 button.
- It inverts the canvas (diagrams, etc.) BUT
- leaves the separate .textLayer (which is already light) alone.
-*/
+/* This is the key: Text is now colored by our variable */
+.textLayer > span {
+  color: var(--text-color) !important;
+  background-color: transparent !important;
+  transition: color 0.2s;
+}
+
+/* --- 5. Invert Logic --- */
 .invert-canvas .canvasWrapper {
   filter: invert(1) hue-rotate(180deg);
 }
