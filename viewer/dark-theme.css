@@ -1,0 +1,16 @@
+/* This is the key: PDF.js renders text in its own layer */
+.textLayer > span {
+  color: #d4d4d4 !important; /* Force text to be light */
+  background-color: transparent !important;
+}
+
+/* This targets the main page background, drawn on the canvas */
+.canvasWrapper {
+  /* You can experiment with filters just for the background canvas */
+  /* filter: invert(1); */
+}
+
+/* Make sure the page background itself is dark */
+.page {
+  background: #1e1e1e !important;
+}
