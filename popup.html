@@ -2,17 +2,85 @@
 <html>
 <head>
   <style>
-    body { width: 200px; font-family: sans-serif; }
-    .toggle { display: flex; align-items: center; justify-content: space-between; }
+    body {
+      width: 250px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 10px 15px;
+      background-color: #f4f4f4;
+    }
+    h3 {
+      text-align: center;
+      margin-top: 0;
+      color: #333;
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+    .setting-row label {
+      color: #555;
+    }
+    /* Simple toggle switch CSS */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
   </style>
 </head>
 <body>
-  <h3>Dark Mode</h3>
-  <div class="toggle">
-    <span>Quick Filter</span>
+  <h3>Dark PDF Viewer</h3>
+  <div class="setting-row">
+    <label for="enabled-toggle">Enable PDF Viewer</label>
     <label class="switch">
-      <input type="checkbox" id="quick-filter-toggle">
+      <input type="checkbox" id="enabled-toggle">
+      <span class="slider"></span>
     </label>
+  </div>
+  <div class="setting-row">
+    <label for="default-theme-selector">Default Theme</label>
+    <select id="default-theme-selector">
+      <option value="pure-dark">Pure Dark</option>
+      <option value="soft-dark">Soft Dark</option>
+      <option value="sepia">Sepia</option>
+    </select>
   </div>
   <script src="popup.js"></script>
 </body>
