@@ -178,6 +178,5 @@ function initialize() {
     loadAndRenderPDF();
   });
 }
-
 // --- Run the initialization ---
 initialize();
