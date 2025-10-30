@@ -21,7 +21,10 @@
     {
       "resources": [
         "viewer/viewer.html",
-        "viewer/pdf.worker.mjs"
+        "viewer/pdf.worker.mjs",
+        "viewer/viewer.css",
+        "viewer/cmaps/*",
+        "viewer/wasm/*"
       ],
       "matches": ["<all_urls>"]
     }

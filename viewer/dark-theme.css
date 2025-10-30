@@ -78,21 +78,18 @@ body {
   /* Use the page-bg-color variable for the div */
   background: var(--page-bg-color) !important;
   margin-bottom: 20px;
-  position: relative; /* Needed for text layer to overlay properly */
+  position: relative; 
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
+
+  /* --- ADD THESE TWO LINES --- */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .textLayer {
   position: absolute;
   top: 0;
   left: 0;
-}
-
-/* This is the key: Text is now colored by our variable */
-.textLayer > span {
-  color: var(--text-color) !important;
-  background-color: transparent !important;
-  transition: color 0.2s;
 }
 
 /* --- 5. Invert Logic --- */

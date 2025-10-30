@@ -1,8 +1,8 @@
-// 1. Import the PDF.js library
-import * as pdfjsLib from './pdf.mjs';
+// 1. Import ALL necessary functions from the CORE library
+import { getDocument, GlobalWorkerOptions, TextLayer } from './pdf.mjs';
 
 // 2. Set the path to the worker file
-pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('viewer/pdf.worker.mjs');
+GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('viewer/pdf.worker.mjs');
 
 // --- Theme Definitions ---
 const THEMES = {
@@ -76,12 +76,20 @@ async function reRenderCanvasBackgrounds(themeName) {
     }
   }
 }
-
 // --- V2: loadAndRenderPDF (Initial load) ---
 async function loadAndRenderPDF() {
   try {
-    // Load the document and store it in our global variable
-    pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
+    // --- THIS IS THE FIX ---
+    // We must provide the paths to the new folders
+    const docParams = {
+  url: pdfUrl,
+  cMapUrl: chrome.runtime.getURL('viewer/cmaps/'),
+  cMapPacked: true,
+  // This is the correct parameter name to fix the JpxError
+  wasmUrl: chrome.runtime.getURL('viewer/wasm/openjpeg.wasm') 
+};
+pdfDoc = await getDocument(docParams).promise;
+    // --- END OF FIX ---
 
     for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
       const page = await pdfDoc.getPage(pageNum);
@@ -116,45 +124,22 @@ async function loadAndRenderPDF() {
         backgroundColor: THEMES[currentTheme].pageBg 
       }).promise;
 
-      // Render the text layer
-      const textContent = await page.getTextContent();
-      
-      const textLayerDiv = document.createElement('div');
-      textLayerDiv.className = 'textLayer';
-      textLayerDiv.style.width = viewport.width + 'px';
-      textLayerDiv.style.height = viewport.height + 'px';
-      textLayerDiv.id = 'text-layer-' + pageNum; // Add ID
-      pageDiv.appendChild(textLayerDiv);
-        
-      pdfjsLib.renderTextLayer({
-        textContentSource: textContent,
-        container: textLayerDiv,
-        viewport: viewport,
-        textDivs: []
-      });
     }
   } catch (error) {
     console.error('Error loading PDF:', error);
 
     // --- Publication-Ready Error Handling ---
-    
-    // 1. Hide the toolbar
     const toolbar = document.getElementById('toolbar');
     if (toolbar) {
       toolbar.style.display = 'none';
     }
-    
-    // 2. Clear the container
     container.innerHTML = ''; 
-    
-    // 3. Show a user-friendly message
     const errorMsg = document.createElement('div');
-    errorMsg.style.color = 'var(--text-color)'; // Use our theme's text color
+    errorMsg.style.color = 'var(--text-color)';
     errorMsg.style.textAlign = 'center';
     errorMsg.style.padding = '50px';
     errorMsg.style.fontSize = '18px';
     errorMsg.style.fontFamily = 'sans-serif';
-    
     errorMsg.innerHTML = `
       <h3 style="font-size: 24px;">Failed to Load PDF</h3>
       <p>Sorry, this document could not be loaded or is unavailable.</p>
