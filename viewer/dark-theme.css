@@ -6,11 +6,28 @@
 
 /* This targets the main page background, drawn on the canvas */
 .canvasWrapper {
-  /* You can experiment with filters just for the background canvas */
-  /* filter: invert(1); */
+  /* Default: no filter, background is set in JS */
 }
 
-/* Make sure the page background itself is dark */
+/* Make sure the page div itself is dark */
 .page {
   background: #1e1e1e !important;
+  margin-bottom: 20px; /* Add some space between pages */
+  position: relative; /* Needed for text layer to overlay properly */
+}
+
+/* The text layer sits on top of the canvas */
+.textLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/*
+ This is the "Smart Invert" logic for the V1 button.
+ It inverts the canvas (diagrams, etc.) BUT
+ leaves the separate .textLayer (which is already light) alone.
+*/
+.invert-canvas .canvasWrapper {
+  filter: invert(1) hue-rotate(180deg);
 }

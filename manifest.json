@@ -4,12 +4,12 @@
   "version": "0.1.0",
   "description": "Applies a readable dark theme to PDFs and documents.",
   "permissions": [
-    "storage",      
-    "activeTab",   
-    "scripting"     
+    "storage",
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
-    "<all_urls>" 
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -26,7 +26,10 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["viewer/viewer.html"],
+      "resources": [
+        "viewer/viewer.html",
+        "viewer/pdf.worker.mjs"
+      ],
       "matches": ["<all_urls>"]
     }
   ],

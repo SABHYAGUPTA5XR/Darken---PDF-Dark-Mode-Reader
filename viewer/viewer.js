@@ -1,20 +1,25 @@
-// This is a simplified PDF.js loader. 
-// You'll need to download PDF.js from Mozilla's site and include its files.
+// 1. Import the PDF.js library
+import * as pdfjsLib from './pdf.mjs';
 
-// 1. Get the PDF file URL from our query parameter
+// 2. Set the path to the worker file
+// This is critical for performance!
+pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('viewer/pdf.worker.mjs');
+
+// 3. Get the PDF file URL from our query parameter
 const urlParams = new URLSearchParams(window.location.search);
 const pdfUrl = decodeURIComponent(urlParams.get('file'));
 
 const container = document.getElementById('pdf-container');
 
-// 2. Initialize PDF.js (simplified)
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+async function renderPDF() {
+  try {
+    // 4. Load the document
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    const pdf = await loadingTask.promise;
 
-// 3. Load the document
-pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-  // Loop through all pages
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    pdf.getPage(pageNum).then(page => {
+    // 5. Loop through all pages
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
       
       const viewport = page.getViewport({ scale: 1.5 });
       
@@ -25,32 +30,58 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
       canvas.width = viewport.width;
 
       // Create a div to hold both canvas and text
+      // We apply the dark-theme CSS classes here
       const pageDiv = document.createElement('div');
       pageDiv.className = 'page';
       pageDiv.style.width = viewport.width + 'px';
       pageDiv.style.height = viewport.height + 'px';
-      pageDiv.appendChild(canvas);
+      
+      const canvasWrapper = document.createElement('div');
+      canvasWrapper.className = 'canvasWrapper';
+      canvasWrapper.appendChild(canvas);
+      pageDiv.appendChild(canvasWrapper);
       
       container.appendChild(pageDiv);
       
       // Render the page content (backgrounds, images)
-      page.render({ canvasContext, viewport });
+      await page.render({
+        canvasContext,
+        viewport,
+        backgroundColor: '#1e1e1e' // <-- V1 UPDATE: Forces dark background
+      }).promise;
 
       // Render the text layer
-      page.getTextContent().then(textContent => {
-        const textLayerDiv = document.createElement('div');
-        textLayerDiv.className = 'textLayer';
-        textLayerDiv.style.width = viewport.width + 'px';
-        textLayerDiv.style.height = viewport.height + 'px';
-        pageDiv.appendChild(textLayerDiv);
+      const textContent = await page.getTextContent();
+      
+      const textLayerDiv = document.createElement('div');
+      textLayerDiv.className = 'textLayer';
+      textLayerDiv.style.width = viewport.width + 'px';
+      textLayerDiv.style.height = viewport.height + 'px';
+      pageDiv.appendChild(textLayerDiv);
         
-        pdfjsLib.renderTextLayer({
-          textContent,
-          container: textLayerDiv,
-          viewport,
-          textDivs: []
-        });
+      // This function renders the text spans that our CSS will turn white
+      pdfjsLib.renderTextLayer({
+        textContentSource: textContent,
+        container: textLayerDiv,
+        viewport: viewport,
+        textDivs: []
       });
-    });
+    }
+  } catch (error) {
+    console.error('Error rendering PDF:', error);
+    const errorMsg = document.createElement('h3');
+    errorMsg.textContent = `Failed to load PDF: ${error.message}`;
+    errorMsg.style.color = 'white';
+    container.appendChild(errorMsg);
   }
+}
+
+renderPDF();
+
+// --- V1 UPDATE: Button logic ---
+const toggleBtn = document.getElementById('invert-toggle');
+const containerDiv = document.getElementById('pdf-container');
+
+toggleBtn.addEventListener('click', () => {
+  containerDiv.classList.toggle('invert-canvas');
 });
