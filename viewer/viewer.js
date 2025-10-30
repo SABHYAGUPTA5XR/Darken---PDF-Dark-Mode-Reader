@@ -4,7 +4,7 @@ import * as pdfjsLib from './pdf.mjs';
 // 2. Set the path to the worker file
 pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('viewer/pdf.worker.mjs');
 
-// --- NEW V1: Theme Definitions ---
+// --- V1: Theme Definitions ---
 const THEMES = {
   'pure-dark': {
     bg: '#1e1e1e',     // CSS body background
@@ -30,19 +30,19 @@ const toggleBtn = document.getElementById('invert-toggle');
 const urlParams = new URLSearchParams(window.location.search);
 const pdfUrl = decodeURIComponent(urlParams.get('file'));
 
-let currentTheme = 'pure-dark'; // Default
+let currentTheme = 'pure-dark'; // This will be set by our storage logic
 
 // --- Theme Apply Function ---
 function applyTheme(themeName) {
   currentTheme = themeName;
   document.body.dataset.theme = themeName;
   
-  // Note: This only affects NEWLY rendered pages.
-  // For a full V1, we'd need to re-render all pages,
-  // but for now, we'll just set it for the initial render.
-  // We'll also update the body style immediately.
-  document.body.style.backgroundColor = THEMES[themeName].bg;
-  document.body.style.color = THEMES[themeName].text;
+  // We can't just set body style, must set the root properties
+  // (This is a fix from the previous step, our CSS uses :root)
+  const root = document.documentElement;
+  root.style.setProperty('--bg-color', THEMES[themeName].bg);
+  root.style.setProperty('--text-color', THEMES[themeName].text);
+  root.style.setProperty('--page-bg-color', THEMES[themeName].pageBg);
 }
 
 // --- PDF Rendering Function ---
@@ -109,17 +109,33 @@ toggleBtn.addEventListener('click', () => {
 
 // 2. Theme Selector
 themeSelector.addEventListener('change', (e) => {
-  applyTheme(e.target.value);
+  const newTheme = e.target.value;
+  applyTheme(newTheme);
   
-  // *** CHALLENGE ***
-  // As noted above, changing theme *after* render is hard.
-  // The simple V1 fix is to alert the user to reload.
-  // A V2 fix would re-render all canvases.
-  alert("Theme changed! You may need to reload the PDF for the page backgrounds to update fully.");
+  // --- NEW: Save the user's choice to sync storage ---
+  chrome.storage.sync.set({ selectedTheme: newTheme });
+  
+  // We removed the annoying 'alert()'
 });
 
-// --- Initial Load ---
-// Set default theme on body
-applyTheme('pure-dark');
-// Render the PDF
-renderPDF();
+// --- NEW: Initial Load Function ---
+function initialize() {
+  // Get the saved theme, or use 'pure-dark' as a default
+  chrome.storage.sync.get({ selectedTheme: 'pure-dark' }, (data) => {
+    const savedTheme = data.selectedTheme;
+    
+    // 1. Apply the theme to the page
+    // (This sets the 'currentTheme' variable)
+    applyTheme(savedTheme);
+    
+    // 2. Set the dropdown to show the correct saved value
+    themeSelector.value = savedTheme;
+    
+    // 3. NOW we can render the PDF, which will use the
+    // 'currentTheme' variable for its background color.
+    renderPDF();
+  });
+}
+
+// --- Run the initialization ---
+initialize();
