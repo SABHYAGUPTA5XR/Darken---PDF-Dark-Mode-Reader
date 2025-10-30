@@ -138,6 +138,31 @@ async function loadAndRenderPDF() {
   } catch (error) {
     console.error('Error loading PDF:', error);
     // ... (error handling) ...
+    // 1. Hide the toolbar
+    const toolbar = document.getElementById('toolbar');
+    if (toolbar) {
+      toolbar.style.display = 'none';
+    }
+    
+    // 2. Clear the container
+    container.innerHTML = ''; 
+    
+    // 3. Show a user-friendly message
+    const errorMsg = document.createElement('div');
+    errorMsg.style.color = 'var(--text-color)'; // Use our theme's text color
+    errorMsg.style.textAlign = 'center';
+    errorMsg.style.padding = '50px';
+    errorMsg.style.fontSize = '18px';
+    errorMsg.style.fontFamily = 'sans-serif';
+    
+    errorMsg.innerHTML = `
+      <h3 style="font-size: 24px;">Failed to Load PDF</h3>
+      <p>Sorry, this document could not be loaded or is unavailable.</p>
+      <p style="font-size: 14px; opacity: 0.7;">
+        <em>Error: ${error.message}</em>
+      </p>
+    `;
+    container.appendChild(errorMsg);
   }
 }
 
