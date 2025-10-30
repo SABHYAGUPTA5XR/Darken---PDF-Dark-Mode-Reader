@@ -30,13 +30,12 @@ const toggleBtn = document.getElementById('invert-toggle');
 const urlParams = new URLSearchParams(window.location.search);
 const pdfUrl = decodeURIComponent(urlParams.get('file'));
 
-// --- V2 UPDATE: Global state variables ---
+// --- V2: Global state variables ---
 let currentTheme = 'pure-dark';
 let pdfDoc = null; // Will hold the loaded PDF document
 let pageViewports = []; // Will hold the viewport for each page
 
 // --- Theme Apply Function (CSS only) ---
-// This function now ONLY applies the CSS variables, making it fast.
 function applyTheme(themeName) {
   currentTheme = themeName;
   document.body.dataset.theme = themeName;
@@ -47,7 +46,7 @@ function applyTheme(themeName) {
   root.style.setProperty('--page-bg-color', THEMES[themeName].pageBg);
 }
 
-// --- V2 UPDATE: New function to re-render canvases ---
+// --- V2: New function to re-render canvases ---
 async function reRenderCanvasBackgrounds(themeName) {
   if (!pdfDoc) return; // Don't do anything if the PDF isn't loaded
 
@@ -78,8 +77,7 @@ async function reRenderCanvasBackgrounds(themeName) {
   }
 }
 
-// --- V2 UPDATE: Renamed from renderPDF to loadAndRenderPDF ---
-// This function now does the *initial* load and render.
+// --- V2: loadAndRenderPDF (Initial load) ---
 async function loadAndRenderPDF() {
   try {
     // Load the document and store it in our global variable
@@ -96,13 +94,13 @@ async function loadAndRenderPDF() {
       const canvasContext = canvas.getContext('2d');
       canvas.height = viewport.height;
       canvas.width = viewport.width;
-      canvas.id = 'canvas-' + pageNum; // --- V2 UPDATE: Add ID
+      canvas.id = 'canvas-' + pageNum; // Add ID
 
       const pageDiv = document.createElement('div');
       pageDiv.className = 'page';
       pageDiv.style.width = viewport.width + 'px';
       pageDiv.style.height = viewport.height + 'px';
-      pageDiv.id = 'page-div-' + pageNum; // --- V2 UPDATE: Add ID
+      pageDiv.id = 'page-div-' + pageNum; // Add ID
       
       const canvasWrapper = document.createElement('div');
       canvasWrapper.className = 'canvasWrapper';
@@ -125,7 +123,7 @@ async function loadAndRenderPDF() {
       textLayerDiv.className = 'textLayer';
       textLayerDiv.style.width = viewport.width + 'px';
       textLayerDiv.style.height = viewport.height + 'px';
-      textLayerDiv.id = 'text-layer-' + pageNum; // --- V2 UPDATE: Add ID
+      textLayerDiv.id = 'text-layer-' + pageNum; // Add ID
       pageDiv.appendChild(textLayerDiv);
         
       pdfjsLib.renderTextLayer({
@@ -137,7 +135,9 @@ async function loadAndRenderPDF() {
     }
   } catch (error) {
     console.error('Error loading PDF:', error);
-    // ... (error handling) ...
+
+    // --- Publication-Ready Error Handling ---
+    
     // 1. Hide the toolbar
     const toolbar = document.getElementById('toolbar');
     if (toolbar) {
@@ -180,7 +180,7 @@ themeSelector.addEventListener('change', (e) => {
   // 1. Apply CSS variables (fast)
   applyTheme(newTheme);
   
-  // 2. --- V2 UPDATE: Re-render canvases (slower, but async) ---
+  // 2. Re-render canvases (slower, but async)
   reRenderCanvasBackgrounds(newTheme);
   
   // 3. Save the choice
@@ -203,5 +203,6 @@ function initialize() {
     loadAndRenderPDF();
   });
 }
+
 // --- Run the initialization ---
 initialize();

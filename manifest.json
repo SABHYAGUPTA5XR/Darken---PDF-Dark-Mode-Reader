@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Dark Mode Document Viewer",
-  "version": "0.1.0",
-  "description": "Applies a readable dark theme to PDFs and documents.",
+  "version": "1.0.0",
+  "description": "Applies a readable dark theme to PDFs opened in the browser.",
   "permissions": [
     "storage",
-    "activeTab",
-    "scripting"
+    "webNavigation"
   ],
   "host_permissions": [
     "<all_urls>"
